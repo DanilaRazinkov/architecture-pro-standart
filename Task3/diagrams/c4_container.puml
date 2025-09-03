@@ -14,12 +14,12 @@ System_Boundary(bank, "Банк 'Стандарт'") {
     Container(lb, "API Gateway", "Маршрутизация запросов, аутентификация")
 
     Container(depositService, "Deposit Service", "Java Spring Boot", "Управление заявками: создание, статусы, валидация")
-    Container(rateService, "Rate Management Service", "ASP.NET Core", "Управление ставками: базовые ставки, персонализация, расчеты")
-
-    Container(kafkaMQ, "Message Queue", "Kafka", "Асинхронная передача заявок")
+    Container(rateService, "Rate Service", "ASP.NET Core", "Управление ставками: базовые ставки, персонализация, расчеты")
 
     ContainerDb(depositDb, "Deposit Database", "PostgreSQL", "Заявки на депозиты, статусы")
     ContainerDb(rateDb, "Rate Database", "PostgreSQL", "Базовые ставки, правила персонализации, история изменений")
+
+    Container(kafkaMQ, "Message Queue", "Kafka", "Передача заявок")
 
     System_Boundary(absSystem, "АБС") {
         Container(abs, "ABS", "PL-SQL", "Данные клиентов, счета, депозитные продукты")
@@ -39,24 +39,24 @@ Rel(user, internetBank, "Подает заявку", "HTTPS")
 Rel(callAgent, crm, "Обрабатывает заявки", "HTTPS")
 Rel(backOffice, abs, "Обрабатывает в АБС", "Web")
 
-Rel(website, lb, "API запросы", "JSON/HTTPS")
-Rel(internetBank, lb, "API запросы", "JSON/HTTPS")
+Rel(website, lb, "API запросы", "HTTPS")
+Rel(internetBank, lb, "API запросы", "HTTPS")
 
-Rel(lb, depositService, "Заявки", "JSON/HTTP")
-Rel(lb, rateService, "Ставки", "JSON/HTTP")
+Rel(lb, depositService, "Заявки", "HTTP")
+Rel(lb, rateService, "Ставки", "HTTP")
 
-Rel(depositService, rateService, "Получает ставки", "JSON/HTTP")
-Rel(depositService, kafkaMQ, "Передает заявки", "Kafka")
-Rel(depositService, depositDb, "Заявки", "SQL")
+Rel(depositService, rateService, "Получает ставки", "HTTP")
+Rel(depositService, kafkaMQ, "Передача заявки")
+Rel(depositService, depositDb, "Заявки")
 
-Rel(rateService, rateDb, "Ставки и правила", "SQL")
+Rel(rateService, rateDb, "Ставки и правила")
 Rel(rateService, abs, "Данные клиентов для персонализации", "HTTPS")
 
-Rel(crm, kafkaMQ, "Получает заявки", "Kafka")
-Rel(crm, crmBD, "Данные CRM", "SQL")
+Rel(crm, crmBD, "Данные CRM")
 Rel(crm, abs, "Создает заявки", "HTTPS")
+Rel(crm, kafkaMQ, "Получение заявок")
 
-Rel(abs, absDB, "Данные", "SQL")
-Rel(abs, smsGateway, "SMS", "HTTPS/API")
+Rel(abs, absDB, "Данные")
+Rel(abs, smsGateway, "SMS", "HTTPS")
 
 @enduml
